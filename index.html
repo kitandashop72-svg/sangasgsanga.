@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema de Gestão de Igreja</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- ================== ESTILOS ================== -->
+    <style>
+        :root{
+            --azul:#1e3a8a;
+            --verde:#166534;
+            --dourado:#d4af37;
+            --cinza:#f3f4f6;
+            --escuro:#111827;
+        }
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body{
+            background:var(--cinza);
+        }
+
+        /* ===== LOGIN ===== */
+        .login{
+            height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            background:linear-gradient(135deg, var(--azul), var(--verde));
+        }
+
+        .login-box{
+            background:#fff;
+            padding:25px;
+            border-radius:10px;
+            width:100%;
+            max-width:350px;
+        }
+
+        .login-box h2{
+            text-align:center;
+            margin-bottom:20px;
+            color:var(--azul);
+        }
+
+        .login-box input, .login-box select{
+            width:100%;
+            padding:10px;
+            margin-bottom:10px;
+            border:1px solid #ccc;
+            border-radius:6px;
+        }
+
+        .login-box button{
+            width:100%;
+            padding:10px;
+            background:var(--azul);
+            color:#fff;
+            border:none;
+            border-radius:6px;
+            cursor:pointer;
+        }
+
+        /* ===== LAYOUT ===== */
+        .app{
+            display:none;
+        }
+
+        .sidebar{
+            position:fixed;
+            left:0;
+            top:0;
+            width:220px;
+            height:100%;
+            background:var(--azul);
+            color:#fff;
+            padding:20px;
+        }
+
+        .sidebar h3{
+            text-align:center;
+            margin-bottom:20px;
+            color:var(--dourado);
+        }
+
+        .sidebar button{
+            width:100%;
+            margin-bottom:8px;
+            padding:10px;
+            background:transparent;
+            border:1px solid rgba(255,255,255,0.3);
+            color:#fff;
+            border-radius:6px;
+            cursor:pointer;
+            text-align:left;
+        }
+
+        .sidebar button:hover{
+            background:rgba(255,255,255,0.1);
+        }
+
+        .content{
+            margin-left:220px;
+            padding:20px;
+        }
+
+        h2{
+            margin-bottom:10px;
+            color:var(--azul);
+        }
+
+        .card{
+            background:#fff;
+            padding:15px;
+            border-radius:8px;
+            margin-bottom:15px;
+        }
+
+        input, select{
+            padding:8px;
+            width:100%;
+            margin-bottom:8px;
+        }
+
+        button{
+            padding:8px 12px;
+            border:none;
+            border-radius:6px;
+            background:var(--verde);
+            color:#fff;
+            cursor:pointer;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+            margin-top:10px;
+        }
+
+        th, td{
+            border-bottom:1px solid #ddd;
+            padding:8px;
+            text-align:left;
+        }
+
+        th{
+            background:var(--cinza);
+        }
+
+        @media(max-width:768px){
+            .sidebar{
+                position:relative;
+                width:100%;
+                height:auto;
+            }
+            .content{
+                margin-left:0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ================== LOGIN ================== -->
+<div class="login" id="login">
+    <div class="login-box">
+        <h2>🔐 Gestão da Igreja</h2>
+        <input type="text" id="user" placeholder="Utilizador">
+        <input type="password" id="pass" placeholder="Senha">
+        <select id="role">
+            <option value="admin">Administrador</option>
+            <option value="lider">Pastor / Líder</option>
+        </select>
+        <button onclick="login()">Entrar</button>
+    </div>
+</div>
+
+<!-- ================== APLICAÇÃO ================== -->
+<div class="app" id="app">
+
+    <!-- ===== MENU ===== -->
+    <div class="sidebar">
+        <h3>⛪ Igreja</h3>
+        <button onclick="mostrar('dashboard')">📊 Dashboard</button>
+        <button onclick="mostrar('membros')">👥 Membros</button>
+        <button onclick="mostrar('ministerios')">🕊️ Ministérios</button>
+        <button onclick="mostrar('eventos')">📅 Eventos</button>
+        <button onclick="mostrar('financas')">💰 Finanças</button>
+        <button onclick="mostrar('relatorios')">🧾 Relatórios</button>
+        <button onclick="logout()">🚪 Sair</button>
+    </div>
+
+    <!-- ===== CONTEÚDO ===== -->
+    <div class="content">
+
+        <!-- DASHBOARD -->
+        <div id="dashboard" class="card">
+            <h2>📊 Painel Geral</h2>
+            <p>Total de Membros: <b id="totalMembros">0</b></p>
+            <p>Total de Ministérios: <b id="totalMinisterios">0</b></p>
+            <p>Total Arrecadado no Mês: <b id="totalMes">0 Kz</b></p>
+            <p>Próximo Evento: <b id="proximoEvento">Nenhum</b></p>
+        </div>
+
+        <!-- MEMBROS -->
+        <div id="membros" class="card" style="display:none">
+            <h2>👥 Gestão de Membros</h2>
+            <input id="mNome" placeholder="Nome completo">
+            <input id="mTelefone" placeholder="Telefone">
+            <input id="mProvincia" placeholder="Bairro / Província">
+            <input id="mMinisterio" placeholder="Ministério">
+            <button onclick="addMembro()">Cadastrar</button>
+
+            <table>
+                <thead>
+                    <tr><th>Nome</th><th>Telefone</th><th>Ministério</th><th>Ações</th></tr>
+                </thead>
+                <tbody id="listaMembros"></tbody>
+            </table>
+        </div>
+
+        <!-- MINISTÉRIOS -->
+        <div id="ministerios" class="card" style="display:none">
+            <h2>🕊️ Ministérios</h2>
+            <input id="minNome" placeholder="Nome do Ministério">
+            <input id="minLider" placeholder="Líder Responsável">
+            <button onclick="addMinisterio()">Cadastrar</button>
+
+            <ul id="listaMinisterios"></ul>
+        </div>
+
+        <!-- EVENTOS -->
+        <div id="eventos" class="card" style="display:none">
+            <h2>📅 Eventos / Cultos</h2>
+            <input id="eTipo" placeholder="Tipo de evento">
+            <input id="eData" type="date">
+            <input id="eLocal" placeholder="Local">
+            <button onclick="addEvento()">Cadastrar</button>
+
+            <ul id="listaEventos"></ul>
+        </div>
+
+        <!-- FINANÇAS -->
+        <div id="financas" class="card" style="display:none">
+            <h2>💰 Finanças</h2>
+            <input id="fTipo" placeholder="Dízimo / Oferta / Doação">
+            <input id="fValor" type="number" placeholder="Valor">
+            <button onclick="addFinanca()">Registrar</button>
+
+            <ul id="listaFinancas"></ul>
+        </div>
+
+        <!-- RELATÓRIOS -->
+        <div id="relatorios" class="card" style="display:none">
+            <h2>🧾 Relatórios</h2>
+            <button onclick="window.print()">🖨️ Imprimir Relatório</button>
+        </div>
+
+    </div>
+</div>
+
+<!-- ================== JAVASCRIPT ================== -->
+<script>
+    /* ===== LOGIN SIMPLES ===== */
+    function login(){
+        document.getElementById('login').style.display='none';
+        document.getElementById('app').style.display='block';
+        atualizarDashboard();
+    }
+
+    function logout(){
+        location.reload();
+    }
+
+    function mostrar(id){
+        document.querySelectorAll('.content .card').forEach(c=>c.style.display='none');
+        document.getElementById(id).style.display='block';
+    }
+
+    /* ===== MEMBROS ===== */
+    let membros = JSON.parse(localStorage.getItem('membros')) || [];
+
+    function addMembro(){
+        membros.push({
+            nome:mNome.value,
+            tel:mTelefone.value,
+            prov:mProvincia.value,
+            min:mMinisterio.value
+        });
+        localStorage.setItem('membros',JSON.stringify(membros));
+        listarMembros();
+        atualizarDashboard();
+    }
+
+    function listarMembros(){
+        listaMembros.innerHTML='';
+        membros.forEach((m,i)=>{
+            listaMembros.innerHTML+=`
+                <tr>
+                    <td>${m.nome}</td>
+                    <td>${m.tel}</td>
+                    <td>${m.min}</td>
+                    <td><button onclick="remMembro(${i})">❌</button></td>
+                </tr>`;
+        });
+    }
+
+    function remMembro(i){
+        membros.splice(i,1);
+        localStorage.setItem('membros',JSON.stringify(membros));
+        listarMembros();
+        atualizarDashboard();
+    }
+
+    /* ===== MINISTÉRIOS ===== */
+    let ministerios = JSON.parse(localStorage.getItem('ministerios')) || [];
+
+    function addMinisterio(){
+        ministerios.push({nome:minNome.value, lider:minLider.value});
+        localStorage.setItem('ministerios',JSON.stringify(ministerios));
+        listarMinisterios();
+        atualizarDashboard();
+    }
+
+    function listarMinisterios(){
+        listaMinisterios.innerHTML='';
+        ministerios.forEach(m=>{
+            listaMinisterios.innerHTML+=`<li>${m.nome} - ${m.lider}</li>`;
+        });
+    }
+
+    /* ===== EVENTOS ===== */
+    let eventos = JSON.parse(localStorage.getItem('eventos')) || [];
+
+    function addEvento(){
+        eventos.push({tipo:eTipo.value, data:eData.value, local:eLocal.value});
+        localStorage.setItem('eventos',JSON.stringify(eventos));
+        listarEventos();
+        atualizarDashboard();
+    }
+
+    function listarEventos(){
+        listaEventos.innerHTML='';
+        eventos.forEach(e=>{
+            listaEventos.innerHTML+=`<li>${e.tipo} - ${e.data} (${e.local})</li>`;
+        });
+    }
+
+    /* ===== FINANÇAS ===== */
+    let financas = JSON.parse(localStorage.getItem('financas')) || [];
+
+    function addFinanca(){
+        financas.push({tipo:fTipo.value, valor:Number(fValor.value)});
+        localStorage.setItem('financas',JSON.stringify(financas));
+        listarFinancas();
+        atualizarDashboard();
+    }
+
+    function listarFinancas(){
+        listaFinancas.innerHTML='';
+        financas.forEach(f=>{
+            listaFinancas.innerHTML+=`<li>${f.tipo}: ${f.valor} Kz</li>`;
+        });
+    }
+
+    /* ===== DASHBOARD ===== */
+    function atualizarDashboard(){
+        totalMembros.innerText = membros.length;
+        totalMinisterios.innerText = ministerios.length;
+        totalMes.innerText = financas.reduce((s,f)=>s+f.valor,0) + " Kz";
+        proximoEvento.innerText = eventos[0]?.tipo || "Nenhum";
+    }
+
+    listarMembros();
+    listarMinisterios();
+    listarEventos();
+    listarFinancas();
+</script>
+
+</body>
+</html>
